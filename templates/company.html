@@ -1,0 +1,67 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container w-100 d-flex flex-column justify-content-center">
+  <h2 class="display-6 text-center mt-5">Add a Company</h2>
+  <form class="row g-1" action="{{ url_for('company') }}" method="POST">
+    <div class="col">
+      <label class="form-label" for="company-name">Company Name:</label>
+      <input
+        class="form-control"
+        type="text"
+        id="company-name"
+        name="company_name"
+        required
+      />
+    </div>
+    <div class="row g-1">
+      <div class="col">
+        <label class="form-label" for="website">Website:</label>
+        <input
+          class="form-control"
+          id="website"
+          type="text"
+          name="website"
+          required
+        />
+      </div>
+    </div>
+    <div class="row g-1">
+      <div class="col">
+        <label class="form-label" for="industry">Industry:</label>
+        <input
+          class="form-control"
+          type="text"
+          id="industry"
+          name="industry"
+          required
+        />
+      </div>
+    </div>
+    <div class="row g-1 justify-content-center">
+      <div class="col-4 m-2">
+        <button class="btn btn-primary w-100" type="submit">Add Company</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<h2 class="display-6 text-center mt-5">List of Companies</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Company</th>
+      <th scope="col">Website</th>
+      <th scope="col">Industry</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      {% for company in companies %}
+      <td>{{ company.name }}</td>
+      <td>{{ company.website }}</td>
+      <td>{{ company.industry }}</td>
+      {% endfor %}
+    </tr>
+  </tbody>
+</table>
+{% endblock %}

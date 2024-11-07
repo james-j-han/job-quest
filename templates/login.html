@@ -1,0 +1,36 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container w-100 d-flex flex-column justify-content-center ">
+  <h2 class="display-6 text-center">Login</h2>
+  <form class="row g-3" action="{{ url_for('login') }}" method="POST">
+    <div class="col">
+      <label class="form-label" for="username">Username:</label>
+      <input
+        class="form-control"
+        type="text"
+        id="username"
+        name="username"
+        required
+      />
+    </div>
+    <div class="col">
+      <label class="form-label" for="password">Password:</label>
+      <input
+        class="form-control"
+        type="password"
+        id="password"
+        name="password"
+        required
+      />
+    </div>
+    <div class="row g-3 justify-content-center">
+      <div class="col-md-4 text-center">
+        <button class="btn btn-success w-100" type="submit">Login</button>
+      </div>
+    </div>
+  </form>
+  <p class="text-center m-2">
+    Don't have an account?
+    <a class="link-opacity-100" href="{{ url_for('register') }}">Register</a>
+  </p>
+</div>
+{% endblock %}
