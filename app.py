@@ -166,7 +166,6 @@ def job():
         salary = request.form['salary']
         deadline = request.form['deadline']
         date_posted = request.form['date_posted']
-        print(company_id)
 
         query = text("""
         INSERT INTO job_listings (title, description, company_id, location, salary, date_posted, deadline)
@@ -180,11 +179,22 @@ def job():
     
     # Join job_listings and companies tables
     query = text("""
-        SELECT * FROM job_listings
-        INNER JOIN companies
-        ON job_listings.company_id = companies.id
+        SELECT
+        jl.id,
+        jl.title,
+        jl.description,
+        jl.location,
+        jl.salary,
+        jl.date_posted,
+        jl.deadline,
+        c.name
+        FROM job_listings AS jl
+        INNER JOIN companies AS c
+        ON jl.company_id = c.id
     """)
     job_listings = db.session.execute(query).fetchall()
+    for job in job_listings:
+        print(job)
 
     return render_template('job.html', companies=companies, job_listings=job_listings)
 
@@ -213,3 +223,20 @@ def analytics():
 @app.route('/notification')
 def reminder():
     return 'Notification'
+
+@app.route('/apply/<int:job_id>', methods=['GET'])
+def apply(job_id):
+    print(job_id)
+    return redirect(url_for('job'))
+
+@app.route('/delete-job/<int:job_id>', methods=['GET'])
+def delete_job(job_id):
+    query = text("DELETE FROM job_listings WHERE id = :job_id")
+    db.session.execute(query, {"job_id": job_id})
+    db.session.commit()
+    return redirect(url_for('job'))
+
+@app.route('/edit-job/<int:job_id>', methods=['GET'])
+def edit_job(job_id):
+    print(job_id)
+    return redirect(url_for('job'))
