@@ -1,20 +1,72 @@
 {% extends 'base.html' %} {% block content %}
-<div class="applications-content">
-  <table class="applications-table">
-    <tr>
-      <th>Date Submitted</th>
-      <th>Job Title</th>
-      <th>Company</th>
-      <th>Location</th>
-      <th>Status</th>
-    </tr>
-    <tr>
-      <td>2021-10-01</td>
-      <td>Software Engineer</td>
-      <td>Google</td>
-      <td>Mountain View, CA</td>
-      <td>Applied</td>
-    </tr>
-  </table>
+<div class="container w-100 d-flex flex-column justify-content-center">
+  <div class="accordion mt-5" id="accordionOne">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOne"
+          aria-expanded="true"
+          aria-controls="collapseOne"
+        >
+          Application Status Distribution
+        </button>
+      </h2>
+      <div
+        id="collapseOne"
+        class="accordion-collapse collapse show"
+        aria-labelledby="headingOne"
+        data-bs-parent="#accordionOne"
+      >
+        <div class="accordion-body">{{ pie_chart | safe}}</div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingTwo">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseTwo"
+          aria-expanded="false"
+          aria-controls="collapseTwo"
+        >
+          Company Salary Distribution
+        </button>
+      </h2>
+      <div
+        id="collapseTwo"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingTwo"
+        data-bs-parent="#accordionOne"
+      >
+        <div class="accordion-body">{{ salary_chart | safe}}</div>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingThree">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseThree"
+          aria-expanded="false"
+          aria-controls="collapseThree"
+        >
+          Application Heatmap Distribution
+        </button>
+      </h2>
+      <div
+        id="collapseThree"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingThree"
+        data-bs-parent="#accordionOne"
+      >
+        <div class="accordion-body">{{ heatmap_chart | safe}}</div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
