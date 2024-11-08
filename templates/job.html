@@ -1,125 +1,170 @@
 {% extends 'base.html' %} {% block content %}
 <div class="container w-100 d-flex flex-column justify-content-center">
-  <h2 class="display-6 text-center mt-5">Add Job</h2>
-  <form class="row g-1" action="{{ url_for('job') }}" method="POST">
-    <div class="col">
-      <label class="form-label" for="job-title">Job Title:</label>
-      <input
-        class="form-control"
-        type="text"
-        id="job-title"
-        name="job_title"
-        value="{{ job_info[1] | default('') }}"
-        required
-      />
+  <div class="accordion mt-5" id="accordionOne">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOne"
+          aria-expanded="true"
+          aria-controls="collapseOne"
+        >
+          Add a Job
+        </button>
+      </h2>
+      <div
+        id="collapseOne"
+        class="accordion-collapse collapse show"
+        aria-labelledby="headingOne"
+        data-bs-parent="#accordionOne"
+      >
+        <div class="accordion-body">
+          <form class="row g-1" action="{{ url_for('job') }}" method="POST">
+            <div class="col">
+              <label class="form-label" for="job-title">Job Title:</label>
+              <input
+                class="form-control"
+                type="text"
+                id="job-title"
+                name="job_title"
+                value="{{ job_info[1] | default('') }}"
+                required
+              />
+            </div>
+            <div class="col">
+              <label class="form-label" for="company">Company:</label>
+              <select class="form-control" id="company" name="company_id" required>
+                <option value="" disabled selected>Select a company</option>
+                {% for company in companies %}
+                <option value="{{ company.id }}" {% if company.id == job_info[8] %}selected{% endif %}>{{ company.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="row g-1">
+              <div class="col">
+                <label class="form-label" for="location">Location:</label>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="location"
+                  name="location"
+                  value="{{ job_info[3] | default('') }}"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label class="form-label" for="date-posted">Date Posted:</label>
+                <input
+                  class="form-control"
+                  type="date"
+                  id="date-posted"
+                  name="date_posted"
+                  value="{{ job_info[5] | default('') }}"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label class="form-label" for="deadline">Deadline:</label>
+                <input
+                  class="form-control"
+                  type="date"
+                  id="deadline"
+                  name="deadline"
+                  value="{{ job_info[6] | default('') }}"
+                  required
+                />
+              </div>
+              <div class="col">
+                <label class="form-label" for="salary">Salary:</label>
+                <input
+                  class="form-control"
+                  type="number"
+                  id="salary"
+                  name="salary"
+                  min="0"
+                  placeholder="50000"
+                  value="{{ job_info[4] | default('') }}"
+                  required
+                />
+              </div>
+            </div>
+            <div class="row g-1">
+              <div class="col">
+                <label class="form-label" for="description">Description:</label>
+                <textarea
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  required
+                >{{ job_info[2] | default('') }}</textarea>
+              </div>
+            </div>
+            <div class="row g-1 justify-content-center">
+              <div class="col-4 m-2">
+                <button class="btn btn-primary w-100" type="submit">Add Job</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <div class="col">
-      <label class="form-label" for="company">Company:</label>
-      <select class="form-control" id="company" name="company_id" required>
-        <option value="" disabled selected>Select a company</option>
-        {% for company in companies %}
-        <option value="{{ company.id }}" {% if company.id == job_info[8] %}selected{% endif %}>{{ company.name }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="row g-1">
-      <div class="col">
-        <label class="form-label" for="location">Location:</label>
-        <input
-          class="form-control"
-          type="text"
-          id="location"
-          name="location"
-          value="{{ job_info[3] | default('') }}"
-          required
-        />
-      </div>
-      <div class="col">
-        <label class="form-label" for="date-posted">Date Posted:</label>
-        <input
-          class="form-control"
-          type="date"
-          id="date-posted"
-          name="date_posted"
-          value="{{ job_info[5] | default('') }}"
-          required
-        />
-      </div>
-      <div class="col">
-        <label class="form-label" for="deadline">Deadline:</label>
-        <input
-          class="form-control"
-          type="date"
-          id="deadline"
-          name="deadline"
-          value="{{ job_info[6] | default('') }}"
-          required
-        />
-      </div>
-      <div class="col">
-        <label class="form-label" for="salary">Salary:</label>
-        <input
-          class="form-control"
-          type="number"
-          id="salary"
-          name="salary"
-          min="0"
-          placeholder="50000"
-          value="{{ job_info[4] | default('') }}"
-          required
-        />
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingTwo">
+        <button
+          class="accordion-button collapsed"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseTwo"
+          aria-expanded="false"
+          aria-controls="collapseTwo"
+        >
+          List of Jobs
+        </button>
+      </h2>
+      <div
+        id="collapseTwo"
+        class="accordion-collapse collapse"
+        aria-labelledby="headingTwo"
+        data-bs-parent="#accordionOne"
+      >
+        <div class="accordion-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Job Title</th>
+                <th scope="col">Company</th>
+                <th scope="col">Location</th>
+                <th scope="col">Date Posted</th>
+                <th scope="col">Deadline</th>
+                <th scope="col">Salary</th>
+                <th scope="col">Description</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for job in job_listings %}
+              <tr>
+                <td>{{ job.title }}</td>
+                <td>{{ job.name }}</td>
+                <td>{{ job.location }}</td>
+                <td>{{ job.date_posted }}</td>
+                <td>{{ job.deadline }}</td>
+                <td>${{ job.salary }}</td>
+                <td>{{ job.description }}</td>
+                <td>
+                  <a href="{{ url_for('apply', job_id=job.id) }}" class="btn btn-success btn-sm">Apply</a>
+                  <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-danger btn-sm">Delete</a>
+                  <a href="{{ url_for('edit_job', job_id=job.id) }}" class="btn btn-warning btn-sm">Edit</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
-    <div class="row g-1">
-      <div class="col">
-        <label class="form-label" for="description">Description:</label>
-        <textarea
-          class="form-control"
-          id="description"
-          name="description"
-          required
-        >{{ job_info[2] | default('') }}</textarea>
-      </div>
-    </div>
-    <div class="row g-1 justify-content-center">
-      <div class="col-4 m-2">
-        <button class="btn btn-primary w-100" type="submit">Add Job</button>
-      </div>
-    </div>
-  </form>
+  </div>
 </div>
-
-<h2 class="display-6 text-center mt-5">List of Jobs</h2>
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">Job Title</th>
-      <th scope="col">Company</th>
-      <th scope="col">Location</th>
-      <th scope="col">Date Posted</th>
-      <th scope="col">Deadline</th>
-      <th scope="col">Salary</th>
-      <th scope="col">Description</th>
-      <th scope="col">Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      {% for job in job_listings %}
-      <td>{{ job.title }}</td>
-      <td>{{ job.name }}</td>
-      <td>{{ job.location }}</td>
-      <td>{{ job.date_posted }}</td>
-      <td>{{ job.deadline }}</td>
-      <td>${{ job.salary }}</td>
-      <td>{{ job.description }}</td>
-      <td>
-        <a href="{{ url_for('apply', job_id=job.id) }}" class="btn btn-success btn-sm">Apply</a>
-        <a href="{{ url_for('delete_job', job_id=job.id) }}" class="btn btn-danger btn-sm">Delete</a>
-        <a href="{{ url_for('edit_job', job_id=job.id) }}" class="btn btn-warning btn-sm">Edit</a>
-      </td>
-      {% endfor %}
-    </tr>
-  </tbody>
-</table>
 {% endblock %}
