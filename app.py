@@ -85,7 +85,34 @@ def index():
         flash('Please login first.', 'error')
         return redirect(url_for('login'))
     
-    return render_template('index.html')
+    query = text("""
+    SELECT a.id, a.application_date, a.status, a.notes,
+    jl.title, jl.location, jl.salary,
+    c.name
+    FROM applications AS a
+    INNER JOIN job_listings AS jl
+    ON a.job_id = jl.id
+    INNER JOIN companies AS c
+    ON jl.company_id = c.id
+    WHERE user_id = :user_id
+    """)
+    applications = db.session.execute(query, {"user_id": session['user_id']}).fetchall()
+    
+    return render_template('index.html', applications=applications)
+
+@app.route('/update-status/<int:application_id>', methods=['POST'])
+def update_status(application_id):
+
+    new_status = request.form['status']
+
+    query = text("""
+    UPDATE applications
+    SET status = :status
+    WHERE id = :application_id
+    """)
+    db.session.execute(query, {"status": new_status, "application_id": application_id})
+    db.session.commit()
+    return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -148,13 +175,6 @@ def logout():
     session.pop('user_id', None)
     flash('You have successfully logged out.', 'success')
     return redirect(url_for('login'))
-
-@app.route('/application', methods=['GET', 'POST'])
-def application():
-    if request.method == 'POST':
-        pass
-    
-    return render_template('application.html')
 
 @app.route('/job', methods=['GET', 'POST'])
 def job():
@@ -224,7 +244,12 @@ def reminder():
 
 @app.route('/apply/<int:job_id>', methods=['GET'])
 def apply(job_id):
-    print(job_id)
+    query = text("""
+    INSERT INTO applications (job_id, user_id, application_date, status)
+    VALUES (:job_id, :user_id, CURDATE(), 'Pending')
+    """)
+    db.session.execute(query, {"job_id": job_id, "user_id": session['user_id']})
+    db.session.commit()
     return redirect(url_for('job'))
 
 @app.route('/delete-job/<int:job_id>', methods=['GET'])
@@ -258,5 +283,21 @@ def edit_job(job_id):
     query = text("SELECT id, name FROM companies")
     companies = db.session.execute(query).fetchall()
 
-    return render_template('job.html', job_info=job_info, companies=companies)
+    query = text("""
+        SELECT
+        jl.id,
+        jl.title,
+        jl.description,
+        jl.location,
+        jl.salary,
+        jl.date_posted,
+        jl.deadline,
+        c.name
+        FROM job_listings AS jl
+        INNER JOIN companies AS c
+        ON jl.company_id = c.id
+    """)
+    job_listings = db.session.execute(query).fetchall()
+
+    return render_template('job.html', job_info=job_info, companies=companies, job_listings=job_listings)
     # return redirect(url_for('job', location=job_info[3]))
