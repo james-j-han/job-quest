@@ -4,6 +4,7 @@ from flask_bcrypt import Bcrypt
 from sqlalchemy import text
 from dotenv import load_dotenv
 import os
+import plotly.express as px
 
 load_dotenv()
 
@@ -244,7 +245,81 @@ def company():
 
 @app.route('/analytics')
 def analytics():
-    return render_template('analytics.html')
+    
+    app_status_dist_chart = app_status_dist()
+    salary_dist_chart = salary_dist()
+    app_heatmap_chart = applications_heatmap()
+    return render_template('analytics.html', pie_chart=app_status_dist_chart.to_html(full_html=False), salary_chart=salary_dist_chart.to_html(full_html=False), heatmap_chart=app_heatmap_chart.to_html(full_html=False))
+
+def app_status_dist():
+    query = text("""
+    SELECT status, COUNT(*) AS count
+    FROM applications
+    WHERE user_id = :user_id
+    GROUP BY status
+    """)
+    app_status = db.session.execute(query, {"user_id": session['user_id']}).mappings().fetchall()
+    statuses = [row['status'] for row in app_status]
+    counts = [row['count'] for row in app_status]
+
+    colors = ['#0d6efd', '#198754', '#dc3545']
+    fig = px.pie(values=counts, names=statuses, color_discrete_sequence=colors)
+    fig.update_traces(textinfo='percent+label')
+    return fig
+
+def salary_dist():
+    query = text("""
+    SELECT c.name AS company,
+    AVG(jl.salary) AS avg_salary
+    FROM job_listings AS jl
+    INNER JOIN companies AS c
+    ON jl.company_id = c.id
+    WHERE jl.salary > 0 AND jl.user_id = :user_id
+    GROUP BY c.name
+    """)
+    salary_data = db.session.execute(query, {"user_id": session['user_id']}).mappings().fetchall()
+
+    companies = [row['company'] for row in salary_data]
+    avg_salaries = [row['avg_salary'] for row in salary_data]
+
+    fig = px.bar(
+        x=companies,
+        y=avg_salaries,
+        labels={"x": "Company", "y": "Average Salary"}
+    )
+
+    # Update layout
+    fig.update_layout(
+        xaxis_title="Company",
+        yaxis_title="Average Salary",
+        barmode="group"
+    )
+
+    return fig
+
+def applications_heatmap():
+    query = text("""
+    SELECT DAYOFWEEK(application_date) AS day, COUNT(*) AS app_count
+    FROM applications
+    WHERE user_id = :user_id
+    GROUP BY DAYOFWEEK(application_date)
+    ORDER BY day
+    """)
+    heatmap_data = db.session.execute(query, {"user_id": session['user_id']}).mappings().fetchall()
+    weekdays_map = {1: "Sunday", 2: "Monday", 3: "Tuesday", 4: "Wednesday", 5: "Thursday", 6: "Friday", 7: "Saturday"}
+    weekdays = [weekdays_map[row['day']] for row in heatmap_data]
+    app_count = [row['app_count'] for row in heatmap_data]
+
+    fig = px.imshow(
+        [app_count],
+        labels=dict(x="Weekday", y="Frequency", color="Applications Count"),
+        x=weekdays,
+        y=["Applications"],
+        color_continuous_scale="Blues",
+        title="Applications by Weekday"
+    )
+
+    return fig
 
 @app.route('/notification')
 def reminder():
