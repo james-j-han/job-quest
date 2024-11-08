@@ -193,10 +193,8 @@ def job():
         ON jl.company_id = c.id
     """)
     job_listings = db.session.execute(query).fetchall()
-    for job in job_listings:
-        print(job)
 
-    return render_template('job.html', companies=companies, job_listings=job_listings)
+    return render_template('job.html', companies=companies, job_listings=job_listings, job_info=None)
 
 @app.route('/company', methods=['GET', 'POST'])
 def company():
@@ -238,5 +236,27 @@ def delete_job(job_id):
 
 @app.route('/edit-job/<int:job_id>', methods=['GET'])
 def edit_job(job_id):
-    print(job_id)
-    return redirect(url_for('job'))
+    query = text("""
+    SELECT
+    jl.id,
+    jl.title,
+    jl.description,
+    jl.location,
+    jl.salary,
+    jl.date_posted,
+    jl.deadline,
+    c.name,
+    c.id
+    FROM job_listings AS jl
+    INNER JOIN companies AS c
+    ON jl.company_id = c.id
+    WHERE jl.id = :job_id
+    """)
+    job_info = db.session.execute(query, {'job_id': job_id}).fetchone()
+    print(job_info)
+
+    query = text("SELECT id, name FROM companies")
+    companies = db.session.execute(query).fetchall()
+
+    return render_template('job.html', job_info=job_info, companies=companies)
+    # return redirect(url_for('job', location=job_info[3]))

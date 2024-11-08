@@ -9,6 +9,7 @@
         type="text"
         id="job-title"
         name="job_title"
+        value="{{ job_info[1] | default('') }}"
         required
       />
     </div>
@@ -17,7 +18,7 @@
       <select class="form-control" id="company" name="company_id" required>
         <option value="" disabled selected>Select a company</option>
         {% for company in companies %}
-        <option value="{{ company.id }}">{{ company.name }}</option>
+        <option value="{{ company.id }}" {% if company.id == job_info[8] %}selected{% endif %}>{{ company.name }}</option>
         {% endfor %}
       </select>
     </div>
@@ -29,6 +30,7 @@
           type="text"
           id="location"
           name="location"
+          value="{{ job_info[3] | default('') }}"
           required
         />
       </div>
@@ -39,6 +41,7 @@
           type="date"
           id="date-posted"
           name="date_posted"
+          value="{{ job_info[5] | default('') }}"
           required
         />
       </div>
@@ -49,6 +52,7 @@
           type="date"
           id="deadline"
           name="deadline"
+          value="{{ job_info[6] | default('') }}"
           required
         />
       </div>
@@ -61,6 +65,7 @@
           name="salary"
           min="0"
           placeholder="50000"
+          value="{{ job_info[4] | default('') }}"
           required
         />
       </div>
@@ -73,7 +78,7 @@
           id="description"
           name="description"
           required
-        ></textarea>
+        >{{ job_info[2] | default('') }}</textarea>
       </div>
     </div>
     <div class="row g-1 justify-content-center">
