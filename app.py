@@ -35,9 +35,11 @@ with app.app_context():
     create_companies_table = text("""
     CREATE TABLE IF NOT EXISTS companies (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
         name VARCHAR(100) NOT NULL,
         industry VARCHAR(100) NOT NULL,
-        website VARCHAR(100) NOT NULL UNIQUE
+        website VARCHAR(100) NOT NULL UNIQUE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
     """)
     db.session.execute(create_companies_table)
@@ -46,6 +48,7 @@ with app.app_context():
     create_job_listing_table = text("""
     CREATE TABLE IF NOT EXISTS job_listings (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
         title VARCHAR(100) NOT NULL,
         description TEXT NOT NULL,
         company_id INT NOT NULL,
@@ -53,7 +56,8 @@ with app.app_context():
         salary DECIMAL(10, 2) NOT NULL,
         date_posted DATE NOT NULL,
         deadline DATE NOT NULL,
-        FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+        FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
     """)
     db.session.execute(create_job_listing_table)
@@ -94,11 +98,14 @@ def index():
     ON a.job_id = jl.id
     INNER JOIN companies AS c
     ON jl.company_id = c.id
-    WHERE user_id = :user_id
+    WHERE a.user_id = :user_id
     """)
     applications = db.session.execute(query, {"user_id": session['user_id']}).fetchall()
+
+    query = text("SELECT first_name, last_name FROM users WHERE id = :user_id")
+    user = db.session.execute(query, {"user_id": session['user_id']}).fetchone()
     
-    return render_template('index.html', applications=applications)
+    return render_template('index.html', applications=applications, user=user)
 
 @app.route('/update-status/<int:application_id>', methods=['POST'])
 def update_status(application_id):
@@ -188,14 +195,14 @@ def job():
         date_posted = request.form['date_posted']
 
         query = text("""
-        INSERT INTO job_listings (title, description, company_id, location, salary, date_posted, deadline)
-        VALUES (:title, :description, :company_id, :location, :salary, :date_posted, :deadline)
+        INSERT INTO job_listings (title, description, company_id, location, salary, date_posted, deadline, user_id)
+        VALUES (:title, :description, :company_id, :location, :salary, :date_posted, :deadline, :user_id)
         """)
-        db.session.execute(query, {"title": title, "description": description, "company_id": company_id, "location": location, "salary": salary, "date_posted": date_posted, "deadline": deadline})
+        db.session.execute(query, {"title": title, "description": description, "company_id": company_id, "location": location, "salary": salary, "date_posted": date_posted, "deadline": deadline, "user_id": session['user_id']})
         db.session.commit()
 
-    query = text("SELECT id, name FROM companies")
-    companies = db.session.execute(query).fetchall()
+    query = text("SELECT id, name FROM companies WHERE user_id = :user_id")
+    companies = db.session.execute(query, {"user_id": session['user_id']}).fetchall()
     
     # Join job_listings and companies tables
     query = text("""
@@ -211,8 +218,9 @@ def job():
         FROM job_listings AS jl
         INNER JOIN companies AS c
         ON jl.company_id = c.id
+        WHERE jl.user_id = :user_id
     """)
-    job_listings = db.session.execute(query).fetchall()
+    job_listings = db.session.execute(query, {"user_id": session['user_id']}).fetchall()
 
     return render_template('job.html', companies=companies, job_listings=job_listings, job_info=None)
 
@@ -223,14 +231,14 @@ def company():
         industry = request.form['industry']
         website = request.form['website']
 
-        query = text("INSERT INTO companies (name, industry, website) VALUES (:name, :industry, :website)")
-        db.session.execute(query, {"name": company_name, "industry": industry, "website": website})
+        query = text("INSERT INTO companies (name, industry, website, user_id) VALUES (:name, :industry, :website, :user_id)")
+        db.session.execute(query, {"name": company_name, "industry": industry, "website": website, "user_id": session['user_id']})
         db.session.commit()
 
         return redirect(url_for('company'))
     
-    query = text("SELECT * FROM companies")
-    companies = db.session.execute(query).fetchall()
+    query = text("SELECT * FROM companies WHERE user_id = :user_id")
+    companies = db.session.execute(query, {"user_id": session['user_id']}).fetchall()
     
     return render_template('company.html', companies=companies)
 
