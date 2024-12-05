@@ -39,7 +39,7 @@ with app.app_context():
         user_id INT NOT NULL,
         name VARCHAR(100) NOT NULL,
         industry VARCHAR(100) NOT NULL,
-        website VARCHAR(100) NOT NULL UNIQUE,
+        website VARCHAR(100) NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )
     """)
