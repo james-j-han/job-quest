@@ -321,10 +321,6 @@ def applications_heatmap():
 
     return fig
 
-@app.route('/notification')
-def reminder():
-    return 'Notification'
-
 @app.route('/apply/<int:job_id>', methods=['GET'])
 def apply(job_id):
     query = text("""
